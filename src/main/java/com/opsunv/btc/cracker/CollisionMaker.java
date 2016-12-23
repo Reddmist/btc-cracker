@@ -92,7 +92,6 @@ public class CollisionMaker {
 			byte[] hash160 = key.getPubKeyHash();
 			if(filters[Math.abs(hash160[0]%filterNum)].mightContain(hash160)){
 				log(key);
-				break;
 			}
 			if(System.currentTimeMillis()-start>60*1000){
 				System.out.println(Thread.currentThread().getName()+" - "+ n/60+"/s");
