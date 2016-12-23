@@ -29,7 +29,7 @@ public class CollisionMaker {
 	@SuppressWarnings("unchecked")
 	public CollisionMaker(String bloomDir,String logFile) {
 		try {
-			logOutput = new FileOutputStream(logFile);
+			logOutput = new FileOutputStream(logFile,true);
 		} catch (FileNotFoundException e1) {
 			throw new RuntimeException();
 		}
