@@ -1,4 +1,4 @@
-package com.opsunv.btc.cracker;
+package com.opsunv.btc.cracker.walletpasswd;
 
 import java.util.Arrays;
 
@@ -8,6 +8,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bitcoinj.core.ECKey;
+
+import com.opsunv.btc.cracker.Utils;
 
 public class PasswordCracker {
 	private byte[] salt;

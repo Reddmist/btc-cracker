@@ -1,4 +1,4 @@
-package com.opsunv.btc.cracker;
+package com.opsunv.btc.cracker.walletpasswd;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 
-public class App {
+public class PasswordCrackerMain {
 	public static void main(String[] args) throws Exception {
 		int nDeriveIterations = 49019;
 		byte[] salt = Hex.decodeHex("09792b4786f368cb".toCharArray());
