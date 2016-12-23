@@ -1,11 +1,16 @@
 package com.opsunv.btc.cracker;
 
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Utils {
@@ -50,6 +55,47 @@ public class Utils {
 		}
 		
 		return true;
+	}
+	
+	public static long getBalance(String addr){
+		for(int i=0;i<3;i++){
+			InputStream in = null;
+			try{
+				URL url = new URL("https://blockchain.info/q/addressbalance/"+addr);
+				in = (InputStream)url.getContent();
+				return Long.valueOf(IOUtils.toString(in));
+			} catch (Exception e) {
+			} finally{
+				IOUtils.closeQuietly(in);
+			}
+		}
+		
+		throw new RuntimeException();
+	}
+	
+	public static long getReceivedBalance(String addr){
+		for(int i=0;i<3;i++){
+			InputStream in = null;
+			try{
+				URL url = new URL("https://blockchain.info/q/getreceivedbyaddress/"+addr);
+				in = (InputStream)url.getContent();
+				return Long.valueOf(IOUtils.toString(in));
+			} catch (Exception e) {
+			} finally{
+				IOUtils.closeQuietly(in);
+			}
+		}
+		
+		throw new RuntimeException();
+	}
+	
+	public static void show(BigInteger x){
+		ECKey k = ECKey.fromPrivate(x);
+		String addr = Utils.publickKeyToAddress(k.getPubKey());
+		long balance = Utils.getReceivedBalance(addr);
+		if(balance>0){
+			System.out.println(x+","+k.getPrivateKeyAsHex()+","+addr+","+balance+","+Utils.getBalance(addr));
+		}
 	}
 	
 }
