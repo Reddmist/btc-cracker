@@ -6,6 +6,8 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -13,7 +15,13 @@ import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 public class Utils {
+	public static ObjectMapper objectMapper = new ObjectMapper();
+	
 	public static byte[] sha256Twice(byte[] data){
 		return DigestUtils.sha256(DigestUtils.sha256(data));
 	}
@@ -57,13 +65,13 @@ public class Utils {
 		return true;
 	}
 	
-	public static long getBalance(String addr){
+	public static String getURLContent(String urlStr){
 		for(int i=0;i<3;i++){
 			InputStream in = null;
 			try{
-				URL url = new URL("https://blockchain.info/q/addressbalance/"+addr);
+				URL url = new URL(urlStr);
 				in = (InputStream)url.getContent();
-				return Long.valueOf(IOUtils.toString(in));
+				return IOUtils.toString(in);
 			} catch (Exception e) {
 			} finally{
 				IOUtils.closeQuietly(in);
@@ -73,20 +81,12 @@ public class Utils {
 		throw new RuntimeException();
 	}
 	
+	public static long getBalance(String addr){
+		return Long.valueOf(getURLContent("https://blockchain.info/q/addressbalance/"+addr));
+	}
+	
 	public static long getReceivedBalance(String addr){
-		for(int i=0;i<3;i++){
-			InputStream in = null;
-			try{
-				URL url = new URL("https://blockchain.info/q/getreceivedbyaddress/"+addr);
-				in = (InputStream)url.getContent();
-				return Long.valueOf(IOUtils.toString(in));
-			} catch (Exception e) {
-			} finally{
-				IOUtils.closeQuietly(in);
-			}
-		}
-		
-		throw new RuntimeException();
+		return Long.valueOf(getURLContent("https://blockchain.info/q/getreceivedbyaddress/"+addr));
 	}
 	
 	public static void show(BigInteger x){
@@ -96,6 +96,35 @@ public class Utils {
 		if(balance>0){
 			System.out.println(x+","+k.getPrivateKeyAsHex()+","+addr+","+balance+","+Utils.getBalance(addr));
 		}
+	}
+	
+	public static String getAddressInfo(String addr,boolean haveTx){
+		String content = getURLContent("https://blockchain.info/address/"+addr+"?format=json&limit=1");
+		JsonNode json = null;
+		try {
+			json = objectMapper.readTree(content);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		int nTx = json.get("n_tx").asInt();
+		if(haveTx&&nTx<1){
+			return null;
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(nTx+",");
+		sb.append(json.get("total_received").asLong()+",");
+		sb.append(json.get("final_balance").asLong()+",");
+		
+		ArrayNode arr = (ArrayNode)json.get("txs");
+		if(arr.size()>0){
+			Date date = new Date(arr.get(0).get("time").asLong()*1000);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			sb.append(sdf.format(date));
+		}
+		
+		return sb.toString();
 	}
 	
 }

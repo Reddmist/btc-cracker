@@ -8,9 +8,9 @@ public class AddressBalanceChecker {
 	public static void main(String[] args) throws Exception{
 		for(String str:FileUtils.readLines(new File("c:/1.txt"))){
 			String[] arr = str.split(",");
-			long balance = Utils.getReceivedBalance(arr[0]);
-			if(balance>0){
-				System.out.println(str+","+balance+","+Utils.getBalance(arr[0]));
+			String info = Utils.getAddressInfo(arr[0], true);
+			if(info!=null){
+				System.out.println(str+","+info);
 			}
 		}
 	}
